@@ -57,11 +57,10 @@ license: "CC BY"
 
 ![V Сольвеевский конгресс (1927) «Электроны и фотоны»](image/solvay.jpg){#fig-001 width=70%}
 
+{{< include ../project/markdown/01_exponential_growth/01_exponential_growth.qmd >}}
+
+{{< include ../project/markdown/02_exponential_growth/02_exponential_growth.qmd >}}
+
 # Выводы
 
 Здесь кратко описываются итоги проделанной работы.
-
-# Список литературы{.unnumbered}
-
-::: {#refs}
-:::
