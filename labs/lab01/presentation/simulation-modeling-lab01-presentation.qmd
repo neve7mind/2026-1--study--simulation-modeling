@@ -11,7 +11,7 @@ author:
       address: ул. Миклухо-Маклая, д. 6
 ## Title
 title: Лабораторная работа №1
-subtitle: Математическое моделирование
+subtitle: Имитационное моделирование
 license: CC BY
 date: 2026-02-18
 date-format: "YYYY-MM-DD"
