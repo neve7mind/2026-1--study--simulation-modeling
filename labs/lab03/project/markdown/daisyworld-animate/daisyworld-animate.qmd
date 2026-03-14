@@ -1,3 +1,4 @@
+```{julia}
 using Pkg
 Pkg.activate("../project")
 using DrWatson
@@ -5,7 +6,6 @@ using DrWatson
 using Agents
 using DataFrames
 using Plots
-
 
 include(srcdir("daisyworld.jl"))
 
@@ -19,15 +19,13 @@ plotkwargs = (
     heatarray = :temperature,
     heatkwargs = (colorrange = (-20, 60),),
     )
-plt1, _ = abmplot(model; plotkwargs...)
 
-step!(model, 5)
-plt2, _ = abmplot(model; heatarray = model.temperature, plotkwargs...)
+abmvideo(
+    plotsdir("simulation.mp4"),
+    model;
+    title = "Daisy World",
+    frames = 60,
+    plotkwargs...,
+    )
+```
 
-step!(model, 40)
-plt3, _ = abmplot(model; heatarray = model.temperature, plotkwargs...)
-
-
-save(plotsdir("daisy_step001.png"), plt1)
-save(plotsdir("daisy_step005.png"), plt2)
-save(plotsdir("daisy_step040.png"), plt3)

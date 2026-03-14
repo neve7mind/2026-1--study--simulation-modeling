@@ -1,3 +1,5 @@
+using Pkg
+Pkg.activate("../project")
 using DrWatson
 @quickactivate "project"
 using Agents
