@@ -1,14 +1,13 @@
 project:
   title: "report"
   output-dir: "_output"
-
 standalone: true
 self-contained: true
 
 ## Julia support
-# engine: julia
-# julia:
-#   exeflags: ["--project=../project"]
+engine: julia
+julia:
+  exeflags: ["--project=../project"]
 
 ## Generic options
 lang: ru-RU
