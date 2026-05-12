@@ -1,0 +1,71 @@
+using Pkg
+Pkg.activate("../project")
+using DrWatson
+@quickactivate "project"
+
+using ConcurrentSim, Distributions, DataFrames, Random
+using StableRNGs, Plots, CSV, Statistics
+
+include(srcdir("ross_logic.jl"))
+
+const RUNS = 15
+const S = 10
+const SEED = 3
+const LAMBDA = 50.0
+const MU = 10.0
+const NUM_REPAIRERS = 2
+
+const F_dist = Exponential(LAMBDA)
+const G_dist = Exponential(MU)
+
+function run_experiment(current_N)
+    sim = Simulation()
+    repair_facility = Resource(sim, NUM_REPAIRERS)
+    spares = Store{Int}(sim)
+    log_data = DataFrame(time=Float64[], queue_length=Int[], active_repairers=Int[], spares_left=Int[])
+
+    local_rng = StableRNG(SEED)
+
+    @process start_sim_proc(sim, repair_facility, spares, log_data, current_N, S, local_rng, F_dist, G_dist)
+
+    try
+        run(sim, 2000.0)
+        catch e
+        msg = string(e)
+        if !occursin("StopSimulation", msg) rethrow(e) end
+    end
+
+    return log_data, now(sim)
+end
+
+summary_df = DataFrame(N=Int[], AvgCrashTime=Float64[], AvgQueue=Float64[], Load=Float64[], TheoryTime=Float64[])
+p_spares = plot(title="Динамика запаса (N машин)", xlabel="Время", ylabel="Кол-во на складе")
+
+for test_N in [5, 10, 15]
+    total_times = Float64[]
+    last_log = nothing
+
+    for r in 1:RUNS
+        log_df, stop_t = run_experiment(test_N)
+        push!(total_times, stop_t)
+        last_log = log_df
+    end
+
+    m_crash = mean(total_times)
+    m_queue = isempty(last_log.queue_length) ? 0.0 : mean(last_log.queue_length)
+    m_load = isempty(last_log.active_repairers) ? 0.0 : mean(last_log.active_repairers) / NUM_REPAIRERS
+
+    rho = MU / (LAMBDA * test_N) # Теоретический расчет среднего времени до отказа
+    theory_t = (1 / (LAMBDA * test_N)) * sum([rho^k for k in 0:S])
+
+        push!(summary_df, (N=test_N, AvgCrashTime=m_crash, AvgQueue=m_queue, Load=m_load, TheoryTime=theory_t))
+        plot!(p_spares, last_log.time, last_log.spares_left, linetype=:steppost, label="N=$test_N")
+    end
+
+    println("\n--- Результаты моделирования ---")
+    display(summary_df)
+
+    # Сохранение
+    mkpath(datadir("exp_pro"))
+    CSV.write(datadir("exp_pro", "ross_final_metrics.csv"), summary_df)
+    savefig(p_spares, plotsdir("ross_dynamics_plot.png"))
